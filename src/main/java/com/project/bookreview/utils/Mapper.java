@@ -2,7 +2,9 @@ package com.project.bookreview.utils;
 
 import com.project.bookreview.dto.BookDto;
 import com.project.bookreview.dto.BookResponse;
+import com.project.bookreview.dto.ReviewDto;
 import com.project.bookreview.entity.Book;
+import com.project.bookreview.entity.Review;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
 
@@ -50,5 +52,25 @@ public class Mapper {
 
         return bookResponse;
 
+    }
+
+    public Review toReviewEntity(ReviewDto reviewDto){
+
+        Review review = new Review();
+        review.setTitle(reviewDto.getTitle());
+        review.setText(reviewDto.getText());
+        review.setStars(reviewDto.getStars());
+
+        return review;
+    }
+
+    public ReviewDto toReviewDto(Review review){
+
+        ReviewDto reviewDto = new ReviewDto();
+        reviewDto.setTitle(review.getTitle());
+        reviewDto.setText(review.getText());
+        reviewDto.setStars(review.getStars());
+
+        return reviewDto;
     }
 }

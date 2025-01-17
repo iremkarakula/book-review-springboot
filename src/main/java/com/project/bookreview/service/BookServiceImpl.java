@@ -15,16 +15,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 
 
 @AllArgsConstructor
 @Service
 public class BookServiceImpl implements BookService{
 
-
-    @Autowired
     private final BookRepository bookRepository;
-
+    private Mapper mapper;
 
 
     @Override
@@ -32,47 +31,60 @@ public class BookServiceImpl implements BookService{
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<Book> books = bookRepository.findAll(pageable);
 
-        return Mapper.toBookResponse(books);
+        return mapper.toBookResponse(books);
     }
 
 
     @Override
     public BookDto getBookById(long id) {
-        Book book = bookRepository.findById(id).orElseThrow(()-> new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
-        return Mapper.toBookDto(book);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(()->new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
+        return mapper.toBookDto(book);
+
     }
 
 
     @Transactional
     @Override
     public BookDto createBook(BookDto bookDto) {
-        Book book = Mapper.toBookEntity(bookDto);
-        Book savedBook = bookRepository.save(book);
-        return Mapper.toBookDto(savedBook);
+
+        Book book = new Book();
+
+        book.setTitle(bookDto.getTitle());
+        book.setAuthor(bookDto.getAuthor());
+        book.setCategory(bookDto.getCategory());
+        book.setPrice(bookDto.getPrice());
+        book.setPublishedDate(bookDto.getPublishedDate());
+        book.setPageCount(bookDto.getPageCount());
+        book.setLanguage(bookDto.getLanguage());
+
+        return mapper.toBookDto(bookRepository.save(book));
     }
 
 
     @Transactional
     @Override
     public BookDto updateBook(long id, BookDto bookDto) {
-        Book book = bookRepository.findById(id).orElseThrow(()-> new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
+        Book book = bookRepository.findById(id)
+                .orElseThrow(()->new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
 
         book.setTitle(bookDto.getTitle());
         book.setAuthor(bookDto.getAuthor());
         book.setCategory(bookDto.getCategory());
         book.setPrice(bookDto.getPrice());
-        book.setLanguage(bookDto.getLanguage());
-        book.setPageCount(bookDto.getPageCount());
         book.setPublishedDate(bookDto.getPublishedDate());
+        book.setPageCount(bookDto.getPageCount());
+        book.setLanguage(bookDto.getLanguage());
 
-        Book savedBook = bookRepository.save(book);
-        return Mapper.toBookDto(savedBook);
+        return mapper.toBookDto(book);
     }
 
     @Transactional
     @Override
     public void deleteBook(long id) {
         Book book = bookRepository.findById(id).orElseThrow(()-> new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
-        bookRepository.deleteById(id);
+        bookRepository.delete(book);
     }
+
+
 }

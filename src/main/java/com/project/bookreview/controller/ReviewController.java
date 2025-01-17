@@ -9,41 +9,42 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
+@RequestMapping("/book/{bookId}/review")
 public class ReviewController {
 
     @Autowired
     private final ReviewService reviewService;
 
-    @GetMapping("/book/{bookId}/reviews/{reviewId}")
-    public ResponseEntity<ReviewDto> getReviewById(@PathVariable(name = "bookId") long bookId,
-                                                   @PathVariable(name = "reviewId") long reviewId){
-        return new ResponseEntity<>(reviewService.getReviewById(bookId, reviewId),HttpStatus.OK);
+
+
+
+    @GetMapping
+    public ResponseEntity<List<ReviewDto>> getReviews(
+            @PathVariable(name = "bookId") long bookId,
+            @RequestParam(name = "userId", required = false) Optional<Long> userId) {
+
+        return new ResponseEntity<>(reviewService.getReviews(bookId, userId), HttpStatus.OK);
     }
 
-
-    @GetMapping("/book/{bookId}/reviews")
-    public ResponseEntity<List<ReviewDto>> getReviewsByBookId(@PathVariable(name = "bookId") long bookId){
-        return new ResponseEntity<>(reviewService.getReviewsByBookId(bookId), HttpStatus.OK);
-    }
-
-    @PostMapping("/book/{bookId}/reviews")
+    @PostMapping
     public ResponseEntity<ReviewDto> createReview(@PathVariable(name = "bookId") long bookId,
                                                   @RequestBody ReviewDto reviewDto){
 
         return new ResponseEntity<>(reviewService.createReview(bookId, reviewDto ), HttpStatus.OK);
     }
 
-    @PutMapping("/book/{bookId}/reviews/{reviewId}")
+    @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewDto> updateReview(@PathVariable(name = "bookId") long bookId,
                                                   @PathVariable(name = "reviewId") long reviewId,
                                                   @RequestBody ReviewDto reviewDto){
-        return new ResponseEntity<>(reviewService.updateReview(bookId,reviewId, reviewDto), HttpStatus.OK);
+        return new ResponseEntity<>(reviewService.updateReview(bookId, reviewId, reviewDto), HttpStatus.OK);
     }
 
-    @DeleteMapping("/book/{bookId}/reviews/{reviewId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<String> deleteReview(@PathVariable(name = "bookId") long bookId,
                                                @PathVariable(name = "reviewId") long reviewId){
         reviewService.deleteReview(bookId, reviewId);

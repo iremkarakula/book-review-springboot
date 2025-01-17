@@ -3,80 +3,93 @@ package com.project.bookreview.service;
 import com.project.bookreview.dto.ReviewDto;
 import com.project.bookreview.entity.Book;
 import com.project.bookreview.entity.Review;
+import com.project.bookreview.entity.User;
 import com.project.bookreview.exceptions.BookException;
 import com.project.bookreview.exceptions.ReviewException;
 import com.project.bookreview.repository.BookRepository;
 import com.project.bookreview.repository.ReviewRepository;
+import com.project.bookreview.repository.UserRepository;
 import com.project.bookreview.utils.Mapper;
+import com.project.bookreview.utils.Validation;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
 public class ReviewServiceImpl implements ReviewService {
 
-    @Autowired
     private final ReviewRepository reviewRepository;
 
-    @Autowired
     private final BookRepository bookRepository;
 
-    @Override
-    public ReviewDto getReviewById(long bookId, long reviewId) {
-        Review review =reviewRepository.findById(reviewId).orElseThrow(()-> new ReviewException("Review bulunamadı", HttpStatus.NOT_FOUND));
-        Book book = bookRepository.findById(bookId).orElseThrow(()->new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
+    private UserRepository userRepository;
 
-        if(review.getBook().getId() != bookId){
-            throw new ReviewException("Review bu kullanıcıya ait değil", HttpStatus.NOT_FOUND);
-        }
-        return Mapper.toReviewDto(review);
+    private Validation validation;
+    private Mapper mapper;
+
+
+    @Override
+    public List<ReviewDto> getReviews(long bookId, Optional<Long> userId) {
+
+        List<Review> list;
+
+       if(userId.isPresent()){
+           list = reviewRepository.findByBookIdAndUserId(bookId, userId);
+       } else {
+           list = reviewRepository.findByBookId(bookId);
+       }
+
+        return list.stream().map(mapper::toReviewDto).collect(Collectors.toList());
     }
 
+
+    @Transactional
     @Override
     public ReviewDto createReview(long bookId, ReviewDto reviewDto) {
-        Review review = Mapper.toReviewEntity(reviewDto);
+
         Book book = bookRepository.findById(bookId).orElseThrow(()->new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
+        User user = userRepository.findById(reviewDto.getUserId()).orElseThrow(()->new UsernameNotFoundException("Kullanıcı bulunamadı"));
 
-        review.setBook(book);
-        Review saved = reviewRepository.save(review);
+            Review review = new Review();
 
-        return Mapper.toReviewDto(saved);
+            review.setTitle(reviewDto.getTitle());
+            review.setText(reviewDto.getText());
+            review.setStars(reviewDto.getStars());
+            review.setUser(user);
+            review.setBook(book);
+
+            return mapper.toReviewDto(reviewRepository.save(review));
     }
 
-    @Override
-    public List<ReviewDto> getReviewsByBookId(long bookId) {
-        List<Review> reviewList = reviewRepository.findByBookId(bookId);
-        return reviewList.stream().map(Mapper::toReviewDto).toList();
-    }
 
+    @Transactional
     @Override
     public ReviewDto updateReview(long bookId, long reviewId, ReviewDto reviewDto) {
-        Review review =reviewRepository.findById(reviewId).orElseThrow(()-> new ReviewException("Review bulunamadı", HttpStatus.NOT_FOUND));
-        Book book = bookRepository.findById(bookId).orElseThrow(()->new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
 
-        if(review.getBook().getId() != bookId){
-            throw new ReviewException("Review bu kullanıcıya ait değil", HttpStatus.NOT_FOUND);
-        }
+        Review review = reviewRepository.findById(reviewId).orElseThrow(()->new ReviewException("Review bulunamadı", HttpStatus.NOT_FOUND));
+
+        validation.validateReviewBelongsToBook(bookId, reviewId);
 
         review.setTitle(reviewDto.getTitle());
         review.setText(reviewDto.getText());
         review.setStars(reviewDto.getStars());
-        reviewRepository.save(review);
-        return Mapper.toReviewDto(review);
+
+        return mapper.toReviewDto(reviewRepository.save(review));
     }
 
+    @Transactional
     @Override
     public void deleteReview(long bookId, long reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(()->new ReviewException("Review bulunamadı", HttpStatus.NOT_FOUND));
-        Book book = bookRepository.findById(bookId).orElseThrow(()->new BookException("Kitap bulunamadı", HttpStatus.NOT_FOUND));
 
-        if(review.getBook().getId() != book.getId()){
-            throw new ReviewException("Review bu kullanıcıya ait değil", HttpStatus.NOT_FOUND);
-        }
+        validation.validateReviewBelongsToBook(bookId, reviewId);
+
         reviewRepository.deleteById(reviewId);
     }
 }

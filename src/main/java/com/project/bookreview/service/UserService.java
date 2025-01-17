@@ -1,26 +1,21 @@
 package com.project.bookreview.service;
 
-import com.project.bookreview.entity.User;
-import com.project.bookreview.repository.UserRepository;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import com.project.bookreview.dto.ReviewDto;
+import com.project.bookreview.dto.UpdateUserRequest;
+import com.project.bookreview.dto.UserResponseDto;
+
 import java.util.List;
 
-@Service
-public class UserService {
+public interface UserService {
 
-    private final UserRepository userRepository;
+        UserResponseDto getUser(long id);
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+        List<UserResponseDto> getAll();
 
-    public List<User> allUsers() {
-        List<User> users = new ArrayList<>();
+        List<ReviewDto> getReviews(long userId);
 
-        userRepository.findAll().forEach(users::add);
+        UserResponseDto updateUser(long userId, UpdateUserRequest updateUserRequest);
 
-        return users;
-    }
+        void delete(long userId);
 }

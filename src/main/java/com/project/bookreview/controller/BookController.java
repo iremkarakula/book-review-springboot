@@ -48,5 +48,4 @@ public class BookController {
         return new ResponseEntity<>("Kitap Silindi", HttpStatus.OK);
     }
 
-
 }

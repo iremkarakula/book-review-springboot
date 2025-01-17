@@ -1,5 +1,6 @@
 package com.project.bookreview.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -73,10 +74,8 @@ public class User implements UserDetails {
 
 
 
-//    @ManyToOne(cascade = CascadeType.REMOVE)
-//    @JoinColumn(name = "role_id", nullable = false)
-//    private Role role;
-
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @JsonManagedReference
+    private List<Review> reviews;
 
 }

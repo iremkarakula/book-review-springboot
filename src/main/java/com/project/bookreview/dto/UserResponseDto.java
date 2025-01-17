@@ -1,23 +1,23 @@
 package com.project.bookreview.dto;
 
-
+import com.project.bookreview.entity.Review;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReviewDto {
+public class UserResponseDto {
 
-    private String title;
-    private String text;
-    private int stars;
+    private String fullName;
 
-    private long userId;
+    private String email;
 
-
-
+    private List<Review> reviews;
 }

@@ -3,27 +3,24 @@ package com.project.bookreview.utils;
 import com.project.bookreview.dto.BookDto;
 import com.project.bookreview.dto.BookResponse;
 import com.project.bookreview.dto.ReviewDto;
+import com.project.bookreview.dto.UserResponseDto;
 import com.project.bookreview.entity.Book;
 import com.project.bookreview.entity.Review;
-import lombok.experimental.UtilityClass;
+import com.project.bookreview.entity.User;
+import com.project.bookreview.repository.BookRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@UtilityClass
+@AllArgsConstructor
+@Component
 public class Mapper {
 
-    public Book toBookEntity(BookDto bookDto){
-        Book book = new Book();
-        book.setTitle(bookDto.getTitle());
-        book.setAuthor(bookDto.getAuthor());
-        book.setCategory(bookDto.getCategory());
-        book.setPrice(bookDto.getPrice());
-        book.setPublishedDate(bookDto.getPublishedDate());
-        book.setPageCount(bookDto.getPageCount());
-        book.setLanguage(bookDto.getLanguage());
-        return book;
-    }
+    private BookRepository bookRepository;
+
+
 
     public BookDto toBookDto(Book book){
         BookDto bookDto = new BookDto();
@@ -40,7 +37,7 @@ public class Mapper {
     public BookResponse toBookResponse(Page<Book> books){
 
         List<Book> bookList = books.getContent();
-        List<BookDto> content = bookList.stream().map(Mapper::toBookDto).toList();
+        List<BookDto> content = bookList.stream().map(this::toBookDto).toList();
 
         BookResponse bookResponse = new BookResponse();
         bookResponse.setContent(content);
@@ -54,15 +51,7 @@ public class Mapper {
 
     }
 
-    public Review toReviewEntity(ReviewDto reviewDto){
 
-        Review review = new Review();
-        review.setTitle(reviewDto.getTitle());
-        review.setText(reviewDto.getText());
-        review.setStars(reviewDto.getStars());
-
-        return review;
-    }
 
     public ReviewDto toReviewDto(Review review){
 
@@ -72,5 +61,15 @@ public class Mapper {
         reviewDto.setStars(review.getStars());
 
         return reviewDto;
+    }
+
+    public UserResponseDto toUserResponseDto(User user){
+
+        UserResponseDto userDto = new UserResponseDto();
+        userDto.setEmail(user.getEmail());
+        userDto.setFullName(user.getFullName());
+        userDto.setReviews(user.getReviews());
+
+        return userDto;
     }
 }

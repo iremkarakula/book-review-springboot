@@ -1,6 +1,7 @@
 package com.project.bookreview.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,6 +46,7 @@ public class Book {
     private LanguageEnum language;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "book")
+    @JsonManagedReference
     private List<Review> reviews;
 
 
